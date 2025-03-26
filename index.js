@@ -1,6 +1,26 @@
 const express = require('express')
-const app = express()
+const { MongoClient } = require('mongodb');
+
+
 const port = 3000
+const mongoUrl = 'mongodb://localhost:27017';
+const dbName = 'movies';
+
+const client = new MongoClient(mongoUrl);
+const app = express()
+
+const connect2db = async () => {
+    await client.connect();
+    console.log("banco conectado")
+}
+
+const disconnect2db = async () => {
+    await client.close();
+    console.log("banco desconectado")
+}
+
+connect2db()
+
 app.use(express.static('public'))
 
 app.get('/api/movies', (req, res) => {
