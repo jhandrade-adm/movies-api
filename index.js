@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const port = 3000
+app.use(express.static('public'))
 
 app.get('/api/movies', (req, res) => {
     const movies = [
@@ -60,3 +61,4 @@ app.post('/api/movies', (req, res) => {
 app.listen(port, () => {
     console.log(`App de exemplo esta rodando na porta ${port}`)
 })
+
