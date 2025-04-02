@@ -4,7 +4,8 @@ const { MongoClient } = require('mongodb'); // Importa o MongoClient da bibliote
 
 const port = 3000 // define a porta 3000
 const mongoUrl = 'mongodb://localhost:27017'; // Define a URL de conexão com o banco de dados MongoDB
-const dbName = 'movies'; // define o nome do banco de dados
+const dbName = 'ProjetoMovies'; // define o nome do banco de dados
+const collectionName = "movies";
 
 const client = new MongoClient(mongoUrl); // Cria uma instância do cliente MongoDB para gerenciar a conexão
 const app = express() // Inicializa a aplicação Express
@@ -22,6 +23,8 @@ const disconnect2db = async () => { // Função assíncrona para desconectar do 
 connect2db() // Chama a função para conectar ao banco de dados ao iniciar o servidor
 
 app.use(express.static('public')) // Configura o Express para servir arquivos estáticos da pasta 'public
+
+app.use(express.json()) //meddleware que convert o boda da requisição em objeto js e desponibilizaa na req.body
 
 app.get('/api/movies', (req, res) => { // Rota GET que retorna uma lista de filmes estática em formato JSON
     const movies = [
@@ -61,20 +64,32 @@ app.get('/api/movies/:name', (req, res) => { // Rota GET que retorna um único f
         mpaa: "PG-13"
     }
     res.json(movie) // Envia a resposta como um JSON contendo os detalhes do filme
-    /* 
-    Nome do filme
-    Ano do filme
-    Lista de diretores
-    Lista de atores
-    País de produção
-    Sinopse
-    Identificador do filme
-    Classificação etária
-    */
+
 })
 
-app.post('/api/movies', (req, res) => { //Rota POST para criação de um novo filme (ainda sem lógica implementada)
-    res.sendStatus(201)
+app.post('/api/movies', async (req, res) => { //Rota POST para criação de um novo filme (ainda sem lógica implementada)
+    const name = req.body.name; // acessa a variavel no body da requisição
+    const year = req.body.year;
+    const mpaa = req.body.mpaa;
+    if (
+        name === "" || year < 1887 || mpaa === "" // valida as variaveis
+    ) {
+        res.sendStatus(400); // retorna 400 em caso alguma dessas variaveis seja verdadeira
+    } else {
+        const db = client.db(dbName) // acessa o banco de dados
+        const collection = db.collection(collectionName) // acessa a collection dentro do banco de dados
+        const result = await collection.insertOne({ // insere o objeto da requisição no banco de dados, criando um insertId
+            name, //veriaveis do objeto da requisição
+            year,
+            directors : req.body.directors,
+            cast : req.body.cast,
+            country : req.body.country,
+            synopsis : req.body.synopsis,
+            mpaa
+        })
+        console.log(result) // imprimi o resultado no console
+        res.sendStatus(201) // retorna 201 como código de sucesso
+    }
 })
 
 
