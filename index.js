@@ -26,33 +26,58 @@ app.use(express.static('public')) // Configura o Express para servir arquivos es
 
 app.use(express.json()) //meddleware que convert o boda da requisição em objeto js e desponibilizaa na req.body
 
-app.get('/api/movies', (req, res) => { // Rota GET que retorna uma lista de filmes estática em formato JSON
-    const movies = [
-        {
-            _id: "123456",
-            name: "Hotel Ruanda",
-            year: 1987,
-            directors: ["Gabi", "Thais"],
-            cast: ["João", "Daniel"],
-            country: "Congo",
-            synopsis: "Loren Ipsum",
-            mpaa: "PG-13"
-        },
-        {
-            _id: "123456",
-            name: "Hotel Ruanda",
-            year: 1987,
-            directors: ["Gabi", "Thais"],
-            cast: ["João", "Daniel"],
-            country: "Congo",
-            synopsis: "Loren Ipsum",
-            mpaa: "PG-13"
-        }
-    ]
-    res.json(movies) // Envia a resposta como um JSON contendo os detalhes do filme
+app.get('/api/movies', async (req, res) => { // Rota GET que retorna uma lista de filmes estática em formato JSON
+    //TODO: Fazer um get de todos os filmes que estão no banco de dados
+    const db = client.db(dbName) // acessa o banco de dados
+    const collection = db.collection(collectionName) // acessa a collection dentro do banco de dados
+    const result = await collection.find({}).toArray()
+    console.log(result) // imprimi o resultado no console
+    //res.status(200) // retorna 200 como código de sucesso
+    res.json(result) // Exibe o resultado como objeto Json
 })
 
-app.get('/api/movies/:name', (req, res) => { // Rota GET que retorna um único filme com base no nome (exemplo estático)
+/*[
+    {
+        _id: "123456",
+        name: "Hotel Ruanda",
+        year: 1987,
+        directors: ["Gabi", "Thais"],
+        cast: ["João", "Daniel"],
+        country: "Congo",
+        synopsis: "Loren Ipsum",
+        mpaa: "PG-13"
+    },
+    {
+        _id: "123456",
+        name: "Hotel Ruanda",
+        year: 1987,
+        directors: ["Gabi", "Thais"],
+        cast: ["João", "Daniel"],
+        country: "Congo",
+        synopsis: "Loren Ipsum",
+        mpaa: "PG-13"
+    }
+]
+res.json(movies) // Envia a resposta como um JSON contendo os detalhes do filme
+})*/
+
+app.get('/api/movies/name/:name', async (req, res) => { // Rota GET que retorna um único filme com base no nome (exemplo estático)
+    //TODO: Fazer um get do filme pelo nome
+    const db = client.db(dbName) // acessa o banco de dados
+    const collection = db.collection(collectionName) // acessa a collection dentro do banco de dados
+    const result = await collection.findOne({name: req.params.name}) // Encontra o item pelo parametro name
+    console.log(result) // imprimi o resultado no console
+
+    if(result){
+        res.json(result)
+    } else {
+        res.sendStatus(404)
+    }
+    //res.status(200) // retorna 200 como código de sucesso
+    res.json(result) //Exibe o resultado como um objeto Json
+
+
+    /*console.log(req.params.name)
     const movie = {
         _id: "123456",
         name: "Hotel Ruanda",
@@ -63,9 +88,28 @@ app.get('/api/movies/:name', (req, res) => { // Rota GET que retorna um único f
         synopsis: "Loren Ipsum",
         mpaa: "PG-13"
     }
-    res.json(movie) // Envia a resposta como um JSON contendo os detalhes do filme
+    res.json(movie) // Envia a resposta como um JSON contendo os detalhes do filme*/
 
 })
+
+
+app.delete('/api/movies/name/:name', async (req, res) => { // Rota GET que retorna um único filme com base no nome (exemplo estático)
+    //TODO: Fazer um get do filme pelo nome
+    const db = client.db(dbName) // acessa o banco de dados
+    const collection = db.collection(collectionName) // acessa a collection dentro do banco de dados
+    const result = await collection.deleteOne({name: req.params.name}) // Encontra o item pelo parametro name
+    console.log(result) // imprimi o resultado no console
+
+    if(result.deletedCount) {
+        res.sendStatus(200)
+    } else {
+        res.sendStatus(404)
+    }
+    //res.status(200) // retorna 200 como código de sucesso
+    //res.json(result) //nesse caso só retorno o status
+})
+
+
 
 app.post('/api/movies', async (req, res) => { //Rota POST para criação de um novo filme (ainda sem lógica implementada)
     const name = req.body.name; // acessa a variavel no body da requisição
@@ -81,10 +125,10 @@ app.post('/api/movies', async (req, res) => { //Rota POST para criação de um n
         const result = await collection.insertOne({ // insere o objeto da requisição no banco de dados, criando um insertId
             name, //veriaveis do objeto da requisição
             year,
-            directors : req.body.directors,
-            cast : req.body.cast,
-            country : req.body.country,
-            synopsis : req.body.synopsis,
+            directors: req.body.directors,
+            cast: req.body.cast,
+            country: req.body.country,
+            synopsis: req.body.synopsis,
             mpaa
         })
         console.log(result) // imprimi o resultado no console
