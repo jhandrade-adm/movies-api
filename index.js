@@ -65,16 +65,16 @@ app.get('/api/movies/name/:name', async (req, res) => { // Rota GET que retorna 
     //TODO: Fazer um get do filme pelo nome
     const db = client.db(dbName) // acessa o banco de dados
     const collection = db.collection(collectionName) // acessa a collection dentro do banco de dados
-    const result = await collection.findOne({name: req.params.name}) // Encontra o item pelo parametro name
+    const result = await collection.findOne({ name: req.params.name }) // Encontra o item pelo parametro name
     console.log(result) // imprimi o resultado no console
 
-    if(result){
-        res.json(result)
+    if (result) {
+        res.json(result) //Exibe o resultado como um objeto Json
     } else {
         res.sendStatus(404)
     }
     //res.status(200) // retorna 200 como código de sucesso
-    res.json(result) //Exibe o resultado como um objeto Json
+    
 
 
     /*console.log(req.params.name)
@@ -97,10 +97,10 @@ app.delete('/api/movies/name/:name', async (req, res) => { // Rota GET que retor
     //TODO: Fazer um get do filme pelo nome
     const db = client.db(dbName) // acessa o banco de dados
     const collection = db.collection(collectionName) // acessa a collection dentro do banco de dados
-    const result = await collection.deleteOne({name: req.params.name}) // Encontra o item pelo parametro name
+    const result = await collection.deleteOne({ name: req.params.name }) // Encontra o item pelo parametro name
     console.log(result) // imprimi o resultado no console
 
-    if(result.deletedCount) {
+    if (result.deletedCount) {
         res.sendStatus(200)
     } else {
         res.sendStatus(404)
@@ -133,6 +133,42 @@ app.post('/api/movies', async (req, res) => { //Rota POST para criação de um n
         })
         console.log(result) // imprimi o resultado no console
         res.sendStatus(201) // retorna 201 como código de sucesso
+    }
+})
+
+
+
+app.put('/api/movies/name/:name', async (req, res) => {
+    console.log(req.body)
+    const db = client.db(dbName) // acessa o banco de dados
+    const collection = db.collection(collectionName) // acessa a collection dentro do banco de dados
+
+    const result = await collection.updateOne(
+        { name: req.params.name }, // Encontra o item pelo parametro name
+        {
+            //Substitui os novos dados inseridos no body
+            $set: {
+                year: req.body.year,
+                directors: req.body.directors,
+                cast: req.body.cast,
+                country: req.body.country,
+                synopsis: req.body.synopsis,
+                mpaa: req.body.mpaa
+            }//,
+            // $unset: {
+            //     abc: 1
+            // }
+        }
+    )
+
+    console.log(result)
+
+    if (result.matchedCount) {
+        res.sendStatus(200)
+        return
+    } else {
+        res.sendStatus(404)
+        return
     }
 })
 
